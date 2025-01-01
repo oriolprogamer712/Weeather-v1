@@ -1,1 +1,35 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa del Clima - España</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.0.1/chart.min.css">
+</head>
+<body>
+    <h1>Mapa del Clima en España</h1>
+
+    <div id="controls">
+        <label for="layerSelect">Seleccionar Capa:</label>
+        <select id="layerSelect">
+            <option value="precipitation_new">Precipitación (mm/h)</option>
+            <option value="clouds_new">Nubes</option>
+            <option value="wind_new">Viento</option>
+            <option value="temp_new">Temperatura</option>
+        </select>
+        <label for="opacityRange">Opacidad:</label>
+        <input type="range" id="opacityRange" min="0" max="1" step="0.1" value="0.5">
+    </div>
+
+    <div id="map"></div>
+
+    <canvas id="weatherChart"></canvas>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.0.1/chart.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

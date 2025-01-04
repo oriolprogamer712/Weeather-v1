@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Modification</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f0f8ff;
+        }
+        header {
+            background-color: #007acc;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            width: 100%;
+        }
+        .weather-container {
+            margin-top: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .day {
+            background-color: #ffffff;
+            margin: 10px;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            width: 220px;
+            text-align: center;
+            position: relative;
+        }
+        .day h3 {
+            margin: 10px 0;
+        }
+        .day input {
+            width: 100%;
+            margin-top: 10px;
+        }
+        .day button {
+            margin-top: 10px;
+            padding: 5px 10px;
+            background-color: #007acc;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .day button:hover {
+            background-color: #005a99;
+        }
+        .icon {
+            width: 60px;
+            height: 60px;
+            margin: 10px auto;
+        }
+        .humidity, .wind {
+            font-size: 14px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <h1>Weather Modification Dashboard V1.0</h1>
+    <p>6-Day Weather Forecast (with Modifiable Conditions)</p>
+</header>
+
+<div id="weather" class="weather-container"></div>
+
+<script>
+    const API_KEY = '065f04c11996bb98777a221f4923cedc'; // Replace with your OpenWeatherMap API key
+    const city = 'Barcelona';
+
+    async function fetchWeather() {
+        try {
+            const response = await fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${API_KEY}&units=metric`);
+            const data = await response.json();
+
+            if (data.list) {
+                // Group data by day (get first forecast for each day)
+                const groupedByDay = [];
+                data.list.forEach((item) => {
+                    const date = new Date(item.dt * 1000).toDateString();
+                    if (!groupedByDay.some(day => day.date === date)) {
+                        groupedByDay.push({
+                            date,
+                            temp: item.main.temp,
+                            condition: item.weather[0].description,
+                            icon: item.weather[0].icon,
+                            humidity: item.main.humidity,
+                            wind: item.wind.speed,
+                            pressure: item.main.pressure, // Adding pressure
+                            feels_like: item.main.feels_like // Adding feels_like temperature
+                        });
+                    }
+                });
+                return groupedByDay.slice(0, 7); // Get only the first 7 days
+            } else {
+                throw new Error('Invalid response structure');
+            }
+        } catch (error) {
+            console.error('Error fetching weather data:', error);
+            return [];
+        }
+    }
+
+    function renderWeather(days) {
+        const weatherContainer = document.getElementById('weather');
+        weatherContainer.innerHTML = '';
+
+        days.forEach((day, index) => {
+            const weatherCard = document.createElement('div');
+            weatherCard.className = 'day';
+            weatherCard.innerHTML = `
+                <h3>${day.date}</h3>
+                <img id="icon-${index}" class="icon" src="https://openweathermap.org/img/wn/${day.icon}@2x.png" alt="Weather Icon">
+                <p>Temp: <span id="temp-${index}">${day.temp} °C</span></p>
+                <p>Feels Like: <span id="feels-like-${index}">${day.feels_like} °C</span></p>
+                <p>Condition: <span id="condition-${index}">${day.condition}</span></p>
+                <p class="humidity">Humidity: <span id="humidity-${index}">${day.humidity}%</span></p>
+                <p class="wind">Wind: <span id="wind-${index}">${day.wind} km/h</span></p>
+                <p>Pressure: <span id="pressure-${index}">${day.pressure} hPa</span></p>
+                <input type="text" id="new-temp-${index}" placeholder="New Temp (°C)">
+                <input type="text" id="new-feels-like-${index}" placeholder="New Feels Like Temp (°C)">
+                <input type="text" id="new-condition-${index}" placeholder="New Condition">
+                <input type="text" id="new-humidity-${index}" placeholder="New Humidity (%)">
+                <input type="text" id="new-wind-${index}" placeholder="New Wind (km/h)">
+                <input type="text" id="new-pressure-${index}" placeholder="New Pressure (hPa)">
+                <button onclick="modifyWeather(${index})">Modify</button>
+            `;
+            weatherContainer.appendChild(weatherCard);
+        });
+    }
+
+    function modifyWeather(index) {
+        const newTemp = document.getElementById(`new-temp-${index}`).value;
+        const newFeelsLike = document.getElementById(`new-feels-like-${index}`).value;
+        const newCondition = document.getElementById(`new-condition-${index}`).value;
+        const newHumidity = document.getElementById(`new-humidity-${index}`).value;
+        const newWind = document.getElementById(`new-wind-${index}`).value;
+        const newPressure = document.getElementById(`new-pressure-${index}`).value;
+
+        if (newTemp) {
+            document.getElementById(`temp-${index}`).innerText = `${newTemp} °C`;
+        }
+
+        if (newFeelsLike) {
+            document.getElementById(`feels-like-${index}`).innerText = `${newFeelsLike} °C`;
+        }
+
+        if (newCondition) {
+            document.getElementById(`condition-${index}`).innerText = newCondition;
+        }
+
+        if (newHumidity) {
+            document.getElementById(`humidity-${index}`).innerText = `${newHumidity}%`;
+        }
+
+        if (newWind) {
+            document.getElementById(`wind-${index}`).innerText = `${newWind} km/h`;
+        }
+
+        if (newPressure) {
+            document.getElementById(`pressure-${index}`).innerText = `${newPressure} hPa`;
+        }
+    }
+
+    async function init() {
+        const days = await fetchWeather();
+        renderWeather(days);
+    }
+
+    init();
+</script>
+</body>
+</html>
